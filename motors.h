@@ -10,8 +10,8 @@ public:
     DCMotor(int pins[2]);
 
     // methods
-    void run(bool direction, float duration);
-    void run_continously(bool direction);
+    void runTime(bool direction, float duration);
+    void runContinously(bool direction);
     void stop();
 };
 
