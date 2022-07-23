@@ -1,5 +1,7 @@
-#ifndef MOTORS_H  // if not already defined
-#define MOTORS_H  // define
+#include <Arduino.h>
+
+#ifndef MOTORS_H
+#define MOTORS_H
 
 
 class DCMotor{
@@ -30,4 +32,4 @@ public:
 };
 
 
-#endif  // else
+#endif
