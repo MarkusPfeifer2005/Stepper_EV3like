@@ -1,19 +1,22 @@
+#include <Servo.h>
 #include "motors.h"
 
 
+Servo myservo;
+unsigned int motorpins[4] = {10, 11, 12, 13};
+StepperMotor mot2(motorpins, false);
+
+
 void setup() {
-    //Serial.begin(115200);
+    Serial.begin(115200);
 
-    int motorpins[2] = {2, 7};
-    DCMotor mot1(motorpins);
-    
-    mot1.runTime(true, 3*1000);
-    mot1.runTime(false, 3*1000);
 
-    mot1.runContinously(true);
-    delay(5000);
-    mot1.stop();
+    myservo.attach(9);
+    myservo.write(0);
+
+    delay(1000);
+    mot2.runSteps(50, true, 1, false, true);
+
 }
 
-// the loop function runs over and over again forever
 void loop() {}
