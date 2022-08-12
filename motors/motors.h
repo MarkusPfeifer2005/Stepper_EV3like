@@ -19,25 +19,22 @@ public:
 
 class StepperMotor{
 private:
-    unsigned int num_coils;
-    unsigned int *pins;
-    unsigned int steps;
-    float gear_ratio;
-    bool reverse;  // currently not implemented
-    float pos;  // given in steps; not implemented
-
-    
+    unsigned int coils;     // 4
+    unsigned int *pins;     // pointer variable
+    unsigned int teeth;     // 8 teeth per coil
+    float gear_ratio;       // 64
+    bool reverse;           // currently not implemented
+    float pos;              // given in steps(an internal unit); relative to origin; requires getter & setter
 
 public:
-    void runSteps(int steps, bool direction, float velocity, bool hold, bool halfstepping);
     // constructors
     StepperMotor(unsigned int pins[4], bool reverse);
 
     // methods
-    void runContinously(bool direction, float velocity, bool halfstepping);
+    void runSteps(float steps, bool direction, float velocity, bool hold);
     void runAngle(float angle, bool direction, float velocity, bool hold);
     void runPos();
-    void runCon();
+    void runContinously(bool direction, float velocity, bool halfstepping);
     void stop(bool hold);
 };
 
