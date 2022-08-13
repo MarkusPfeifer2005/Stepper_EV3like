@@ -10,8 +10,10 @@ StepperMotor *pointer_to_mot2 = &mot2;
 void setup() {
     Serial.begin(115200);
 
-    pointer_to_mot2->runPosRad(PI, -0.5, 2, false);
-
+    pointer_to_mot2->runAngleDeg(90, 0.5, 2, false);
+    pointer_to_mot2->runPosDeg(0, 0.5, 2, false);
+    //mot2.setPosDeg(180);
+    Serial.println(mot2.getPosDeg());
 }
 
 void loop() {}

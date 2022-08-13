@@ -42,6 +42,10 @@ public:
     void release();
     void setPosRad(double rad);
     double getPosRad();
+    void setPosDeg(double deg);
+    double getPosDeg();
+    void runAngleDeg(float angle, float stepsize, float velocity, bool hold);
+    void runPosDeg(float angle, float stepsize, float velocity, bool hold);
 };
 
 

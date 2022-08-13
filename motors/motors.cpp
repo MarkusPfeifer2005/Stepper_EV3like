@@ -141,6 +141,7 @@ void StepperMotor::runAngleRad(float angle, float stepsize, float velocity, bool
 
 void StepperMotor::runPosRad(float angle, float stepsize, float velocity, bool hold) {
     // Inaccuracies might occur based on the inaccuracy of PI.
+    // Works only on positive stepsize.
     angle = fmod(2*PI + fmod(angle, 2*PI), 2*PI);
     runAngleRad(angle-getPosRad(), stepsize, velocity, hold);
 };
@@ -153,4 +154,25 @@ void StepperMotor::stop(bool hold) {
     else {
         release();
     }
+};
+
+void StepperMotor::setPosDeg(double deg) {
+    double factor = (coils*teeth*gear_ratio) / 360;
+    setPos(deg*factor);
+};
+
+double StepperMotor::getPosDeg() {
+    double factor = 360 / (coils*teeth*gear_ratio);
+    return pos * factor;
+};
+
+void StepperMotor::runAngleDeg(float angle, float stepsize, float velocity, bool hold) {
+    double factor = (coils*teeth*gear_ratio) / 360;
+    runSteps(angle*factor, stepsize, velocity, hold);
+};
+
+void StepperMotor::runPosDeg(float angle, float stepsize, float velocity, bool hold) {
+    // Works only on positive stepsize.
+    angle = fmod(360 + fmod(angle, 360), 360);
+    runAngleDeg(angle-getPosDeg(), stepsize, velocity, hold);
 };
