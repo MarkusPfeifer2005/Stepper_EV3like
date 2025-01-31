@@ -1,88 +1,52 @@
 #include <Arduino.h>
 #include <math.h>
-#include "motors.h"
+#include "Stepper_EV3like.h"
 
 
-DCMotor::DCMotor(int pins[2]):pins(pins) {
-    // setting all pins als output
-    for (int i = 0; i <= sizeof(pins)/sizeof(pins[0]); i++) {
-        pinMode(pins[i], OUTPUT);
-    }
-}
-
-void DCMotor::runTime(bool direction, int velocity, float duration) {
-    // trun pins on
-    runContinously(direction, velocity);
-    // run given time
-    delay(duration);
-    // turn pins off
-    stop();
-};
-
-void DCMotor::runContinously(bool direction, int velocity) {
-    if (velocity < 0 || velocity > 255) {
-        Serial.println("Velocity must be int between 0 and 255!");
-        exit(0);
-    }
-    // trun pins on
-    if (direction) {
-        analogWrite(pins[1], 0);
-        analogWrite(pins[0], velocity);
-    } else {
-        analogWrite(pins[0], 0);
-        analogWrite(pins[1], velocity);
-    }
-};
-
-void DCMotor::stop() {
-    // turn pins off
-    for (int i = 0; i <= sizeof(pins)/sizeof(pins[0]); i++) {
-        digitalWrite(pins[i], LOW);
-    }
-
-};
-
-StepperMotor::StepperMotor(unsigned int pins[4], bool reverse):pins(pins), reverse(reverse), teeth(8), gear_ratio(64), pos(0), coils(4), max_pwm(255) {
+StepperMotor::StepperMotor(unsigned int pins[4]):pins(pins), teeth(8), gear_ratio(64), pos(0), coils(4), max_pwm(255) {
     for (int i = 0; i < coils; i++) {
         pinMode(pins[i], OUTPUT);
     }
 };
 
+/*Power all coils to hold current position.*/
 void StepperMotor::hold() {
-        float pos_coils = fmod(pos, coils);
-        if (pos_coils == (int)pos_coils) {
-            for (int coil = 0; coil < coils; coil++) {  /*iterating through coils*/
-                if (coil == pos_coils) {
-                    digitalWrite(pins[coil], 1*max_pwm);
-                }
-                else {
-                    digitalWrite(pins[coil], 0);
-                }
+    float pos_coils = fmod(pos, coils);
+    if (pos_coils == (int)pos_coils) {
+        for (int coil = 0; coil < coils; coil++) {  /*iterating through coils*/
+            if (coil == pos_coils) {
+                digitalWrite(pins[coil], 1*max_pwm);
+            }
+            else {
+                digitalWrite(pins[coil], 0);
             }
         }
-        else {
-            int backward = fmod(floor(pos_coils), coils);  // without mod it would be larger than coils
-            int forward = fmod(ceil(pos_coils), coils);  // without mod it would be larger than coils
-            for (int coil = 0; coil < coils; coil++) {  /*iterating through coils*/
-                if (coil == backward) {
-                    digitalWrite(pins[coil], ((int) pos_coils+1-pos_coils)*max_pwm);
-                }
-                else if (coil == forward) {
-                    digitalWrite(pins[coil], (pos_coils - (int) pos_coils)*max_pwm);
-                }
-                else {
-                    digitalWrite(pins[coil], 0);
-                }
+    }
+    else {
+        int backward = fmod(floor(pos_coils), coils);  // without mod it would be larger than coils
+        int forward = fmod(ceil(pos_coils), coils);  // without mod it would be larger than coils
+        for (int coil = 0; coil < coils; coil++) {  /*iterating through coils*/
+            if (coil == backward) {
+                digitalWrite(pins[coil], ((int) pos_coils+1-pos_coils)*max_pwm);
+            }
+            else if (coil == forward) {
+                digitalWrite(pins[coil], (pos_coils - (int) pos_coils)*max_pwm);
+            }
+            else {
+                digitalWrite(pins[coil], 0);
             }
         }
+    }
 };
 
+/*Turn off all coils.*/
 void StepperMotor::release() {
     for (int coil = 0; coil < coils; coil++) {
         digitalWrite(pins[coil], 0);
     }
 };
 
+// Only useful when running more than one thread.
 void StepperMotor::runContinously(float stepsize, float velocity) {
     is_running = true;
     while (true) {
@@ -108,7 +72,7 @@ void StepperMotor::runSteps(float steps, float stepsize, float velocity, bool ho
         }
         setPos(pos+stepsize);
         this->hold();
-        delay(3*velocity);
+        delay(3/velocity);
     }
     if (!hold) {
         release();
@@ -146,6 +110,7 @@ void StepperMotor::runPosRad(float angle, float stepsize, float velocity, bool h
     runAngleRad(angle-getPosRad(), stepsize, velocity, hold);
 };
 
+// Only useful when running more than one thread.
 void StepperMotor::stop(bool hold) {
     is_running = false;
     if (hold) {
@@ -171,8 +136,8 @@ void StepperMotor::runAngleDeg(float angle, float stepsize, float velocity, bool
     runSteps(angle*factor, stepsize, velocity, hold);
 };
 
+// Works only on positive stepsize.
 void StepperMotor::runPosDeg(float angle, float stepsize, float velocity, bool hold) {
-    // Works only on positive stepsize.
     angle = fmod(360 + fmod(angle, 360), 360);
     runAngleDeg(angle-getPosDeg(), stepsize, velocity, hold);
 };
